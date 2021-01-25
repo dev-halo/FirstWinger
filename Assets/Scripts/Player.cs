@@ -10,6 +10,12 @@ public class Player : MonoBehaviour
     [SerializeField]
     private float Speed;
 
+    [SerializeField]
+    private BoxCollider boxCollider;
+
+    [SerializeField]
+    private Transform MainBGQuadTransform;
+
     private void Update()
     {
         UpdateMove();
@@ -22,6 +28,42 @@ public class Player : MonoBehaviour
 
     private void UpdateMove()
     {
+        if (0f == MoveVector.sqrMagnitude)
+        {
+            return;
+        }
+
+        MoveVector = AdjustMoveVector(MoveVector);
+
         transform.position += MoveVector;
+    }
+
+    private Vector3 AdjustMoveVector(Vector3 moveVector)
+    {
+        Vector3 result = Vector3.zero;
+
+        result = boxCollider.transform.position + boxCollider.center + moveVector;
+
+        if (result.x - boxCollider.size.x * 0.5f < -MainBGQuadTransform.localScale.x * 0.5f )
+        {
+            moveVector.x = 0f;
+        }
+
+        if (result.x + boxCollider.size.x * 0.5f > MainBGQuadTransform.localScale.x * 0.5f)
+        {
+            moveVector.x = 0f;
+        }
+
+        if (result.y - boxCollider.size.y * 0.5f < -MainBGQuadTransform.localScale.y * 0.5f)
+        {
+            moveVector.y = 0f;
+        }
+
+        if (result.y + boxCollider.size.y * 0.5f > MainBGQuadTransform.localScale.y * 0.5f)
+        {
+            moveVector.y = 0f;
+        }
+
+        return moveVector;
     }
 }
