@@ -120,7 +120,7 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 548102416555908741}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 1.61, y: 0.29, z: 1}
@@ -135,6 +135,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3785916246678112081}
   - component: {fileID: 9007927411589910453}
+  - component: {fileID: 7302114338031104739}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -172,3 +173,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MoveVector: {x: 0, y: 0, z: 0}
   Speed: 0
+  boxCollider: {fileID: 0}
+  MainBGQuadTransform: {fileID: 0}
+--- !u!54 &7302114338031104739
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8601953158422931925}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0

@@ -21,9 +21,23 @@ public class Player : MonoBehaviour
         UpdateMove();
     }
 
+    private void OnTriggerEnter(Collider other)
+    {
+        Enemy enemy = other.GetComponentInParent<Enemy>();
+        if (enemy)
+        {
+            enemy.OnCrash(this);
+        }
+    }
+
     public void ProcessInput(Vector3 moveDirection)
     {
         MoveVector = moveDirection * Speed * Time.deltaTime;
+    }
+
+    public void OnCrash(Enemy enemy)
+    {
+        Debug.Log($"OnCrash enemy = {enemy}");
     }
 
     private void UpdateMove()
