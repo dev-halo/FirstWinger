@@ -28,5 +28,7 @@ public class SystemManager : MonoBehaviour
         }
 
         instance = this;
+
+        DontDestroyOnLoad(gameObject);
     }
 }

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Enemy : MonoBehaviour
+public class Enemy : Actor
 {
     public enum State : int
     {
@@ -45,7 +45,16 @@ public class Enemy : MonoBehaviour
     [SerializeField]
     private int FireRemainCount = 1;
 
-    private void Update()
+    private void OnTriggerEnter(Collider other)
+    {
+        Player player = other.GetComponentInParent<Player>();
+        if (player)
+        {
+            player.OnCrash(this);
+        }
+    }
+
+    protected override void UpdateActor()
     {
         switch (CurrentState)
         {
@@ -67,15 +76,6 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter(Collider other)
-    {
-        Player player = other.GetComponentInParent<Player>();
-        if (player)
-        {
-            player.OnCrash(this);
-        }
-    }
-
     public void OnCrash(Player player)
     {
         Debug.Log($"OnCrash player = {player}");
@@ -86,7 +86,7 @@ public class Enemy : MonoBehaviour
         GameObject go = Instantiate(Bullet);
 
         Bullet bullet = go.GetComponent<Bullet>();
-        bullet.Fire(OwnerSide.Enemy, FireTransform.position, -FireTransform.right, BulletSpeed);
+        bullet.Fire(OwnerSide.Enemy, FireTransform.position, -FireTransform.right, BulletSpeed, Damage);
     }
 
     private void UpdateSpeed()

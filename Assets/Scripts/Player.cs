@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : MonoBehaviour
+public class Player : Actor
 {
     [SerializeField]
     private Vector3 MoveVector = Vector3.zero;
@@ -25,11 +25,6 @@ public class Player : MonoBehaviour
     [SerializeField]
     private float BulletSpeed = 1f;
 
-    private void Update()
-    {
-        UpdateMove();
-    }
-
     private void OnTriggerEnter(Collider other)
     {
         Enemy enemy = other.GetComponentInParent<Enemy>();
@@ -37,6 +32,11 @@ public class Player : MonoBehaviour
         {
             enemy.OnCrash(this);
         }
+    }
+
+    protected override void UpdateActor()
+    {
+        UpdateMove();
     }
 
     public void ProcessInput(Vector3 moveDirection)
@@ -54,7 +54,7 @@ public class Player : MonoBehaviour
         GameObject go = Instantiate(Bullet);
 
         Bullet bullet = go.GetComponent<Bullet>();
-        bullet.Fire(OwnerSide.Player, FireTransform.position, FireTransform.right, BulletSpeed);
+        bullet.Fire(OwnerSide.Player, FireTransform.position, FireTransform.right, BulletSpeed, Damage);
     }
 
     private void UpdateMove()
