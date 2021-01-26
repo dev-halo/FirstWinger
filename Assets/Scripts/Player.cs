@@ -16,6 +16,15 @@ public class Player : MonoBehaviour
     [SerializeField]
     private Transform MainBGQuadTransform;
 
+    [SerializeField]
+    private Transform FireTransform;
+
+    [SerializeField]
+    private GameObject Bullet;
+
+    [SerializeField]
+    private float BulletSpeed = 1f;
+
     private void Update()
     {
         UpdateMove();
@@ -38,6 +47,14 @@ public class Player : MonoBehaviour
     public void OnCrash(Enemy enemy)
     {
         Debug.Log($"OnCrash enemy = {enemy}");
+    }
+
+    public void Fire()
+    {
+        GameObject go = Instantiate(Bullet);
+
+        Bullet bullet = go.GetComponent<Bullet>();
+        bullet.Fire(OwnerSide.Player, FireTransform.position, FireTransform.right, BulletSpeed);
     }
 
     private void UpdateMove()
