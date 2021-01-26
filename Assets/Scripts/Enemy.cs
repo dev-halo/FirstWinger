@@ -31,7 +31,19 @@ public class Enemy : MonoBehaviour
 
     private float MoveStartTime = 0f;
 
-    private float BattleStartTime = 0f;
+    [SerializeField]
+    private Transform FireTransform;
+
+    [SerializeField]
+    private GameObject Bullet;
+
+    [SerializeField]
+    private float BulletSpeed = 1f;
+
+    private float LastBattleUpdateTime = 0f;
+
+    [SerializeField]
+    private int FireRemainCount = 1;
 
     private void Update()
     {
@@ -69,6 +81,14 @@ public class Enemy : MonoBehaviour
         Debug.Log($"OnCrash player = {player}");
     }
 
+    public void Fire()
+    {
+        GameObject go = Instantiate(Bullet);
+
+        Bullet bullet = go.GetComponent<Bullet>();
+        bullet.Fire(OwnerSide.Enemy, FireTransform.position, -FireTransform.right, BulletSpeed);
+    }
+
     private void UpdateSpeed()
     {
         CurrentSpeed = Mathf.Lerp(CurrentSpeed, MaxSpeed, (Time.time - MoveStartTime) / MaxSpeedTime);
@@ -96,7 +116,7 @@ public class Enemy : MonoBehaviour
         if (CurrentState == State.Appear)
         {
             CurrentState = State.Battle;
-            BattleStartTime = Time.time;
+            LastBattleUpdateTime = Time.time;
         }
         else if (CurrentState == State.Disappear)
         {
@@ -124,9 +144,19 @@ public class Enemy : MonoBehaviour
 
     private void UpdateBattle()
     {
-        if (Time.time - BattleStartTime > 3f)
+        if (Time.time - LastBattleUpdateTime > 1f)
         {
-            Disappear(new Vector3(-15f, transform.position.y, transform.position.z));
+            if (0 < FireRemainCount)
+            {
+                Fire();
+                FireRemainCount--;
+            }
+            else
+            {
+                Disappear(new Vector3(-15f, transform.position.y, transform.position.z));
+            }
+
+            LastBattleUpdateTime = Time.time;
         }
     }
 }

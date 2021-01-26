@@ -10,6 +10,8 @@ public enum OwnerSide : int
 
 public class Bullet : MonoBehaviour
 {
+    private const float LifeTime = 15f;
+
     private OwnerSide ownerSide = OwnerSide.Player;
 
     [SerializeField]
@@ -20,10 +22,16 @@ public class Bullet : MonoBehaviour
 
     private bool needMove = false;
 
+    private float firedTime = 0f;
     private bool hited = false;
 
     private void Update()
     {
+        if (ProcessDisappearCondition())
+        {
+            return;
+        }
+
         UpdateMove();
     }
 
@@ -40,6 +48,7 @@ public class Bullet : MonoBehaviour
         Speed = speed;
 
         needMove = true;
+        firedTime = Time.time;
     }
 
     private void UpdateMove()
@@ -86,5 +95,27 @@ public class Bullet : MonoBehaviour
         {
             Player player = collider.GetComponentInParent<Player>();
         }
+    }
+
+    private bool ProcessDisappearCondition()
+    {
+        if (transform.position.x > 15f || transform.position.x < -15f
+            || transform.position.y > 15f || transform.position.y < -15f)
+        {
+            Disappear();
+            return true;
+        }
+        else if (Time.time - firedTime > LifeTime)
+        {
+            Disappear();
+            return true;
+        }
+
+        return false;
+    }
+
+    private void Disappear()
+    {
+        Destroy(gameObject);
     }
 }
