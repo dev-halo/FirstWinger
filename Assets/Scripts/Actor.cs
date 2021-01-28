@@ -55,15 +55,7 @@ public class Actor : MonoBehaviour
 
     }
 
-    protected virtual void OnDead(Actor attacker)
-    {
-        Debug.Log(name + " OnDead()");
-        isDead = true;
-
-        SystemManager.Instance.EffectManager.GenerateEffect(EffectManager.ActorDeadFxIndex, transform.position);
-    }
-
-    private void DecreaseHP(Actor attacker, int value)
+    protected virtual void DecreaseHP(Actor attacker, int value)
     {
         if (isDead)
         {
@@ -81,5 +73,13 @@ public class Actor : MonoBehaviour
         {
             OnDead(attacker);
         }
+    }
+
+    protected virtual void OnDead(Actor attacker)
+    {
+        Debug.Log(name + " OnDead()");
+        isDead = true;
+
+        SystemManager.Instance.EffectManager.GenerateEffect(EffectManager.ActorDeadFxIndex, transform.position);
     }
 }
