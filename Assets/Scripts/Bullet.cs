@@ -2,17 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum OwnerSide : int
-{
-    Player,
-    Enemy
-}
-
 public class Bullet : MonoBehaviour
 {
     private const float LifeTime = 15f;
-
-    private OwnerSide ownerSide = OwnerSide.Player;
 
     [SerializeField]
     private Vector3 MoveDirection = Vector3.zero;
@@ -27,6 +19,8 @@ public class Bullet : MonoBehaviour
 
     [SerializeField]
     private int Damage = 1;
+
+    private Actor Owner;
 
     private void Update()
     {
@@ -43,9 +37,9 @@ public class Bullet : MonoBehaviour
         OnBulletCollision(other);
     }
 
-    public void Fire(OwnerSide fireOwner, Vector3 firePosition, Vector3 direction, float speed, int damage)
+    public void Fire(Actor owner, Vector3 firePosition, Vector3 direction, float speed, int damage)
     {
-        ownerSide = fireOwner;
+        Owner = owner;
         transform.position = firePosition;
         MoveDirection = direction;
         Speed = speed;
@@ -71,6 +65,12 @@ public class Bullet : MonoBehaviour
     {
         if (Physics.Linecast(transform.position, transform.position + moveVector, out RaycastHit hitInfo))
         {
+            Actor actor = hitInfo.collider.GetComponentInParent<Actor>();
+            if (actor && actor.IsDead)
+            {
+                return moveVector;
+            }
+
             moveVector = hitInfo.point - transform.position;
             OnBulletCollision(hitInfo.collider);
         }
@@ -91,32 +91,23 @@ public class Bullet : MonoBehaviour
             return;
         }
 
+        Actor actor = collider.GetComponentInParent<Actor>();
+        if (actor && actor.IsDead)
+        {
+            return;
+        }
+
+        actor.OnBulletHited(Owner, Damage);
+
         Collider myCollider = GetComponentInChildren<Collider>();
         myCollider.enabled = false;
 
         hited = true;
         needMove = false;
 
-        if (ownerSide == OwnerSide.Player)
-        {
-            Enemy enemy = collider.GetComponentInParent<Enemy>();
-            if (enemy.IsDead)
-            {
-                return;
-            }
-
-            enemy.OnBulletHited(Damage);
-        }
-        else
-        {
-            Player player = collider.GetComponentInParent<Player>();
-            if (player.IsDead)
-            {
-                return;
-            }
-
-            player.OnBulletHited(Damage);
-        }
+        GameObject go = SystemManager.Instance.EffectManager.GenerateEffect(0, transform.position);
+        go.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+        Disappear();
     }
 
     private bool ProcessDisappearCondition()

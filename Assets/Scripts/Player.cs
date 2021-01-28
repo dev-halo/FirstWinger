@@ -39,6 +39,12 @@ public class Player : Actor
         UpdateMove();
     }
 
+    protected override void OnDead(Actor attacker)
+    {
+        base.OnDead(attacker);
+        gameObject.SetActive(false);
+    }
+
     public void ProcessInput(Vector3 moveDirection)
     {
         MoveVector = moveDirection * Speed * Time.deltaTime;
@@ -54,7 +60,7 @@ public class Player : Actor
         GameObject go = Instantiate(Bullet);
 
         Bullet bullet = go.GetComponent<Bullet>();
-        bullet.Fire(OwnerSide.Player, FireTransform.position, FireTransform.right, BulletSpeed, Damage);
+        bullet.Fire(this, FireTransform.position, FireTransform.right, BulletSpeed, Damage);
     }
 
     private void UpdateMove()

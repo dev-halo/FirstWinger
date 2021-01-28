@@ -18,6 +18,15 @@ public class SystemManager : MonoBehaviour
 
     public Player Hero => player;
 
+    private GamePointAccumulator gamePointAccumulator = new GamePointAccumulator();
+
+    public GamePointAccumulator GamePointAccumulator => gamePointAccumulator;
+
+    [SerializeField]
+    private EffectManager effectManager;
+
+    public EffectManager EffectManager => effectManager;
+
     private void Awake()
     {
         if (instance)
