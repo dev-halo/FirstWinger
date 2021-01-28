@@ -48,6 +48,8 @@ public class Enemy : Actor
     [SerializeField]
     private int GamePoint = 10;
 
+    public string FilePath { get; set; }
+
     private void OnTriggerEnter(Collider other)
     {
         Player player = other.GetComponentInParent<Player>();
