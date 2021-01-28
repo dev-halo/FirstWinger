@@ -20,9 +20,6 @@ public class Player : Actor
     private Transform FireTransform;
 
     [SerializeField]
-    private GameObject Bullet;
-
-    [SerializeField]
     private float BulletSpeed = 1f;
 
     private void OnTriggerEnter(Collider other)
@@ -57,9 +54,7 @@ public class Player : Actor
 
     public void Fire()
     {
-        GameObject go = Instantiate(Bullet);
-
-        Bullet bullet = go.GetComponent<Bullet>();
+        Bullet bullet = SystemManager.Instance.BulletManager.Generate(BulletManager.PlayerBulletIndex);
         bullet.Fire(this, FireTransform.position, FireTransform.right, BulletSpeed, Damage);
     }
 

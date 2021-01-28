@@ -22,6 +22,8 @@ public class Bullet : MonoBehaviour
 
     private Actor Owner;
 
+    public string FilePath { get; set; }
+
     private void Update()
     {
         if (ProcessDisappearCondition())

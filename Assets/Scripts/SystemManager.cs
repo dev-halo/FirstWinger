@@ -29,8 +29,11 @@ public class SystemManager : MonoBehaviour
 
     [SerializeField]
     private EnemyManager enemeManager;
-
     public EnemyManager EnemyManager => enemeManager;
+
+    [SerializeField]
+    private BulletManager bulletManager;
+    public BulletManager BulletManager => bulletManager;
 
     private PrefabCacheSystem enemeyCacheSystem = new PrefabCacheSystem();
     public PrefabCacheSystem EnemyCacheSystem => enemeyCacheSystem;
