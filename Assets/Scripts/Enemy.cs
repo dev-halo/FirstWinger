@@ -52,7 +52,14 @@ public class Enemy : Actor
         Player player = other.GetComponentInParent<Player>();
         if (player)
         {
-            player.OnCrash(this);
+            if (!player.IsDead)
+            {
+                BoxCollider box = (BoxCollider)other;
+                Vector3 crashPos = player.transform.position + box.center;
+                crashPos.x += box.size.x * 0.5f;
+
+                player.OnCrash(this, CrashDamage, crashPos);
+            }
         }
     }
 
@@ -78,6 +85,14 @@ public class Enemy : Actor
         }
     }
 
+    protected override void DecreaseHP(Actor attacker, int value, Vector3 damagePos)
+    {
+        base.DecreaseHP(attacker, value, damagePos);
+
+        Vector3 damagePoint = damagePos + Random.insideUnitSphere * 0.5f;
+        SystemManager.Instance.DamageManager.Generate(DamageManager.EnemyDamageIndex, damagePoint, value, Color.magenta);
+    }
+
     protected override void OnDead(Actor attacker)
     {
         base.OnDead(attacker);
@@ -86,11 +101,6 @@ public class Enemy : Actor
         SystemManager.Instance.EnemyManager.RemoveEnemy(this);
 
         CurrentState = State.Dead;
-    }
-
-    public void OnCrash(Player player)
-    {
-        Debug.Log($"OnCrash player = {player}");
     }
 
     public void Fire()
