@@ -22,9 +22,6 @@ public class Player : Actor
     [SerializeField]
     private float BulletSpeed = 1f;
 
-    [SerializeField]
-    private Gauge HPGuage;
-
     private void OnTriggerEnter(Collider other)
     {
         Enemy enemy = other.GetComponentInParent<Enemy>();
@@ -37,7 +34,8 @@ public class Player : Actor
     protected override void Initialize()
     {
         base.Initialize();
-        HPGuage.SetValue(CurrentHP, MaxHP);
+        PlayerStatePanel playerStatePanel = PanelManager.GetPanel(typeof(PlayerStatePanel)) as PlayerStatePanel;
+        playerStatePanel.SetHP(CurrentHP, MaxHP);
     }
 
     protected override void UpdateActor()
@@ -48,7 +46,8 @@ public class Player : Actor
     protected override void DecreaseHP(Actor attacker, int value)
     {
         base.DecreaseHP(attacker, value);
-        HPGuage.SetValue(CurrentHP, MaxHP);
+        PlayerStatePanel playerStatePanel = PanelManager.GetPanel(typeof(PlayerStatePanel)) as PlayerStatePanel;
+        playerStatePanel.SetHP(CurrentHP, MaxHP);
     }
 
     protected override void OnDead(Actor attacker)
