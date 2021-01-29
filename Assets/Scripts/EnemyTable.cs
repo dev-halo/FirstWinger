@@ -46,7 +46,7 @@ public class EnemyTable : TableLoader<EnemyStruct>
         if (!tableDatas.ContainsKey(index))
         {
             Debug.LogError("GetEnemy Error! index = " + index);
-            return default(EnemyStruct);
+            return default;
         }
 
         return tableDatas[index];
