@@ -37,7 +37,7 @@ public class Enemy : Actor
     [SerializeField]
     private float BulletSpeed = 1f;
 
-    private float LastBattleUpdateTime = 0f;
+    private float LastActionUpdateTime = 0f;
 
     [SerializeField]
     private int FireRemainCount = 1;
@@ -46,6 +46,9 @@ public class Enemy : Actor
     private int GamePoint = 10;
 
     public string FilePath { get; set; }
+
+    private Vector3 AppearPoint;
+    private Vector3 DisappearPoint;
 
     private void OnTriggerEnter(Collider other)
     {
@@ -68,7 +71,9 @@ public class Enemy : Actor
         switch (CurrentState)
         {
             case State.None:
+                break;
             case State.Ready:
+                UpdateReady();
                 break;
             case State.Appear:
             case State.Disappear:
@@ -109,6 +114,22 @@ public class Enemy : Actor
         bullet.Fire(this, FireTransform.position, -FireTransform.right, BulletSpeed, Damage);
     }
 
+    public void Reset(EnemyGenerateData data)
+    {
+        CurrentHP = MaxHP = data.MaxHP;
+        Damage = data.Damage;
+        crashDamage = data.CrashDamage;
+        BulletSpeed = data.BulletSpeed;
+        FireRemainCount = data.FireRemainCount;
+        GamePoint = data.GamePoint;
+
+        AppearPoint = data.AppearPoint;
+        DisappearPoint = data.DisappearPoint;
+
+        CurrentState = State.Ready;
+        LastActionUpdateTime = Time.time;
+    }
+
     private void UpdateSpeed()
     {
         CurrentSpeed = Mathf.Lerp(CurrentSpeed, MaxSpeed, (Time.time - MoveStartTime) / MaxSpeedTime);
@@ -136,7 +157,7 @@ public class Enemy : Actor
         if (CurrentState == State.Appear)
         {
             CurrentState = State.Battle;
-            LastBattleUpdateTime = Time.time;
+            LastActionUpdateTime = Time.time;
         }
         else //if (CurrentState == State.Disappear)
         {
@@ -163,9 +184,17 @@ public class Enemy : Actor
         MoveStartTime = Time.time;
     }
 
+    private void UpdateReady()
+    {
+        if (Time.time - LastActionUpdateTime > 1f)
+        {
+            Appear(AppearPoint);
+        }
+    }
+
     private void UpdateBattle()
     {
-        if (Time.time - LastBattleUpdateTime > 1f)
+        if (Time.time - LastActionUpdateTime > 1f)
         {
             if (0 < FireRemainCount)
             {
@@ -174,10 +203,10 @@ public class Enemy : Actor
             }
             else
             {
-                Disappear(new Vector3(-15f, transform.position.y, transform.position.z));
+                Disappear(DisappearPoint);
             }
 
-            LastBattleUpdateTime = Time.time;
+            LastActionUpdateTime = Time.time;
         }
     }
 }

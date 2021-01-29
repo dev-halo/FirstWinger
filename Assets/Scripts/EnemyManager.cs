@@ -17,24 +17,15 @@ public class EnemyManager : MonoBehaviour
         Prepare();
     }
 
-    private void Update()
+    public bool GenerateEnemy(EnemyGenerateData data)
     {
-        if (Input.GetKeyDown(KeyCode.L))
-        {
-            GenerateEnemy(0, new Vector3(15f, 0f, 0f));
-        }
-    }
+        GameObject go = SystemManager.Instance.EnemyCacheSystem.Archive(data.FilePath);
 
-    public bool GenerateEnemy(int index, Vector3 position)
-    {
-        string filePath = enemyFiles[index].filePath;
-        GameObject go = SystemManager.Instance.EnemyCacheSystem.Archive(filePath);
-
-        go.transform.position = position;
+        go.transform.position = data.GeneratePoint;
 
         Enemy enemy = go.GetComponent<Enemy>();
-        enemy.FilePath = filePath;
-        enemy.Appear(new Vector3(7f, 0f, 0f));
+        enemy.FilePath = data.FilePath;
+        enemy.Reset(data);
 
         enemies.Add(enemy);
 
