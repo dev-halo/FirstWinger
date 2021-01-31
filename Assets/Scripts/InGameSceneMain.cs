@@ -30,6 +30,10 @@ public class InGameSceneMain : BaseSceneMain
 
             return player;
         }
+        set
+        {
+            player = value;
+        }
     }
 
     private GamePointAccumulator gamePointAccumulator = new GamePointAccumulator();
@@ -70,6 +74,10 @@ public class InGameSceneMain : BaseSceneMain
     public SquadronManager SquadronManager => squadronManager;
 
     private float sceneStartTime;
+
+    [SerializeField]
+    private Transform mainBGQuadTransform;
+    public Transform MainBGQuadTransform => mainBGQuadTransform;
 
     protected override void OnStart()
     {

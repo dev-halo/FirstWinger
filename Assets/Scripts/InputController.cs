@@ -6,6 +6,11 @@ public class InputController : MonoBehaviour
 {
     private void Update()
     {
+        if (SystemManager.Instance.GetCurrentSceneMain<InGameSceneMain>().CurrentGameState != InGameSceneMain.GameState.Running)
+        {
+            return;
+        }
+
         UpdateInput();
         UpdateMouse();
     }
