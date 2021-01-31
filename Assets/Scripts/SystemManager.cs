@@ -14,46 +14,17 @@ public class SystemManager : MonoBehaviour
     }
 
     [SerializeField]
-    private Player player;
-
-    public Player Hero => player;
-
-    private GamePointAccumulator gamePointAccumulator = new GamePointAccumulator();
-
-    public GamePointAccumulator GamePointAccumulator => gamePointAccumulator;
-
-    [SerializeField]
-    private EffectManager effectManager;
-
-    public EffectManager EffectManager => effectManager;
-
-    [SerializeField]
-    private EnemyManager enemeManager;
-    public EnemyManager EnemyManager => enemeManager;
-
-    [SerializeField]
-    private BulletManager bulletManager;
-    public BulletManager BulletManager => bulletManager;
-
-    [SerializeField]
-    private DamageManager damageManager;
-    public DamageManager DamageManager => damageManager;
-
-    private PrefabCacheSystem enemeyCacheSystem = new PrefabCacheSystem();
-    public PrefabCacheSystem EnemyCacheSystem => enemeyCacheSystem;
-
-    private PrefabCacheSystem bulletCacheSystem = new PrefabCacheSystem();
-    public PrefabCacheSystem BulletCacheSystem => bulletCacheSystem;
-
-    private PrefabCacheSystem effectCacheSystem = new PrefabCacheSystem();
-    public PrefabCacheSystem EffectCacheSystem => effectCacheSystem;
-
-    private PrefabCacheSystem damageCacheSystem = new PrefabCacheSystem();
-    public PrefabCacheSystem DamageCacheSystem => damageCacheSystem;
-
-    [SerializeField]
     private EnemyTable enemyTable;
     public EnemyTable EnemyTable => enemyTable;
+
+    private BaseSceneMain currentSceneMain;
+    public BaseSceneMain CurrentSceneMain
+    {
+        set
+        {
+            currentSceneMain = value;
+        }
+    }
 
     private void Awake()
     {
@@ -67,5 +38,17 @@ public class SystemManager : MonoBehaviour
         instance = this;
 
         DontDestroyOnLoad(gameObject);
+    }
+
+    private void Start()
+    {
+        BaseSceneMain baseSceneMain = FindObjectOfType<BaseSceneMain>();
+        Debug.Log("OnSceneLoaded! BaseSceneMain.name = " + baseSceneMain.name);
+        CurrentSceneMain = baseSceneMain;
+    }
+
+    public T GetCurrentSceneMain<T>() where T : BaseSceneMain
+    {
+        return currentSceneMain as T;
     }
 }

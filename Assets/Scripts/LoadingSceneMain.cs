@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class LoadingSceneMain : BaseSceneMain
 {
+    const float NextSceneInterval = 3f;
     const float TextUpdateInterval = 0.15f;
     const string LoadingTextValue = "Loading...";
 
@@ -12,7 +13,15 @@ public class LoadingSceneMain : BaseSceneMain
     Text LoadingText;
 
     int textIndex = 0;
-    float lastUpdateTime = 0f;
+    float lastUpdateTime;
+
+    float sceneStartTime;
+    bool nextSceneCall = false;
+
+    protected override void OnStart()
+    {
+        sceneStartTime = Time.time;
+    }
 
     protected override void UpdateScene()
     {
@@ -33,5 +42,19 @@ public class LoadingSceneMain : BaseSceneMain
 
             lastUpdateTime = currentTime;
         }
+
+        if (currentTime - sceneStartTime > NextSceneInterval)
+        {
+            if (!nextSceneCall)
+            {
+                GotoNextScene();
+            }
+        }
+    }
+
+    private void GotoNextScene()
+    {
+        SceneController.Instance.LoadScene(SceneNameConstants.InGame);
+        nextSceneCall = true;
     }
 }

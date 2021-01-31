@@ -20,7 +20,7 @@ public class AutoCachableEffect : MonoBehaviour
 
             if (!GetComponent<ParticleSystem>().IsAlive(true))
             {
-                SystemManager.Instance.EffectManager.RemoveEffect(this);
+                SystemManager.Instance.GetCurrentSceneMain<InGameSceneMain>().EffectManager.RemoveEffect(this);
                 break;
             }
         }
