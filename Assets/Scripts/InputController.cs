@@ -2,20 +2,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class InputController : MonoBehaviour
+public class InputController
 {
-    private void Update()
+    public void UpdateInput()
     {
         if (SystemManager.Instance.GetCurrentSceneMain<InGameSceneMain>().CurrentGameState != InGameSceneMain.GameState.Running)
         {
             return;
         }
 
-        UpdateInput();
+        UpdateKeyboard();
         UpdateMouse();
     }
 
-    private void UpdateInput()
+    private void UpdateKeyboard()
     {
         Vector3 moveDirection = Vector3.zero;
 

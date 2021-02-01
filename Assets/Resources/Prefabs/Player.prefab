@@ -211,9 +211,8 @@ MonoBehaviour:
   isDead: 0
   MoveVector: {x: 0, y: 0, z: 0}
   NetworkIdentity: {fileID: 4913246205118495161}
-  Speed: 0
-  boxCollider: {fileID: 0}
-  MainBGQuadTransform: {fileID: 0}
+  Speed: 10
+  boxCollider: {fileID: 9184088283478427976}
   FireTransform: {fileID: 266298223045261856}
   BulletSpeed: 10
 --- !u!54 &7302114338031104739

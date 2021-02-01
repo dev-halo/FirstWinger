@@ -26,6 +26,10 @@ public class SystemManager : MonoBehaviour
         }
     }
 
+    [SerializeField]
+    private NetworkConnectionInfo connectionInfo = new NetworkConnectionInfo();
+    public NetworkConnectionInfo ConnectionInfo => connectionInfo;
+
     private void Awake()
     {
         if (instance)
