@@ -9,6 +9,12 @@ public class FWNetworkManager : NetworkManager
 
     private int playerCount = 0;
 
+    public bool isServer
+    {
+        get;
+        private set;
+    }
+
     #region SERVER SIDE EVENT
     public override void OnServerConnect(NetworkConnection conn)
     {
@@ -46,6 +52,13 @@ public class FWNetworkManager : NetworkManager
     {
         Debug.Log("OnServerDisconnect : " + conn.address);
         base.OnServerDisconnect(conn);
+    }
+
+    public override void OnStartServer()
+    {
+        Debug.Log("OnStartServer");
+        base.OnStartServer();
+        isServer = true;
     }
     #endregion
 

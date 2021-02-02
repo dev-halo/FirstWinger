@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Networking;
 
 public class Enemy : Actor
 {
@@ -15,6 +16,7 @@ public class Enemy : Actor
     }
 
     [SerializeField]
+    [SyncVar]
     private State CurrentState = State.None;
 
     private const float MaxSpeed = 10f;
@@ -22,32 +24,46 @@ public class Enemy : Actor
     private const float MaxSpeedTime = 0.5f;
 
     [SerializeField]
+    [SyncVar]
     private Vector3 TargetPosition;
 
     [SerializeField]
+    [SyncVar]
     private float CurrentSpeed;
 
+    [SyncVar]
     private Vector3 currentVelocity;
 
+    [SyncVar]
     private float MoveStartTime = 0f;
 
     [SerializeField]
     private Transform FireTransform;
 
     [SerializeField]
+    [SyncVar]
     private float BulletSpeed = 1f;
 
+    [SyncVar]
     private float LastActionUpdateTime = 0f;
 
     [SerializeField]
+    [SyncVar]
     private int FireRemainCount = 1;
 
     [SerializeField]
+    [SyncVar]
     private int GamePoint = 10;
 
-    public string FilePath { get; set; }
+    [SyncVar]
+    [SerializeField]
+    private string filePath;
 
+    public string FilePath { get => filePath; set => filePath = value; }
+
+    [SyncVar]
     private Vector3 AppearPoint;
+    [SyncVar]
     private Vector3 DisappearPoint;
 
     private void OnTriggerEnter(Collider other)
@@ -63,6 +79,19 @@ public class Enemy : Actor
 
                 player.OnCrash(this, CrashDamage, crashPos);
             }
+        }
+    }
+
+    protected override void Initialize()
+    {
+        base.Initialize();
+
+        if (!((FWNetworkManager)FWNetworkManager.singleton).isServer)
+        {
+            InGameSceneMain inGameSceneMain = SystemManager.Instance.GetCurrentSceneMain<InGameSceneMain>();
+            transform.SetParent(inGameSceneMain.EnemyManager.transform);
+            inGameSceneMain.EnemyCacheSystem.Add(FilePath, gameObject);
+            gameObject.SetActive(false);
         }
     }
 
@@ -130,6 +159,8 @@ public class Enemy : Actor
 
         CurrentState = State.Ready;
         LastActionUpdateTime = Time.time;
+
+        UpdateNetworkActor();
     }
 
     private void UpdateSpeed()

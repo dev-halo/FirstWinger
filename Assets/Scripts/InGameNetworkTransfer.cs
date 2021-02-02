@@ -40,5 +40,7 @@ public class InGameNetworkTransfer : NetworkBehaviour
         Debug.Log("RpcGameStart");
         countingStartTime = Time.time;
         currentGameState = GameState.Ready;
+
+        SystemManager.Instance.GetCurrentSceneMain<InGameSceneMain>().EnemyManager.Prepare();
     }
 }

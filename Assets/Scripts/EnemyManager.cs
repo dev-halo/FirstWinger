@@ -14,19 +14,23 @@ public class EnemyManager : MonoBehaviour
 
     private void Start()
     {
-        Prepare();
+        //Prepare();
     }
 
     public bool GenerateEnemy(SquadronMemberSturct data)
     {
+        if (!((FWNetworkManager)FWNetworkManager.singleton).isServer)
+        {
+            return true;
+        }
+
         string FilePath = SystemManager.Instance.EnemyTable.GetEnemy(data.EnemyID).FilePath;
         GameObject go = SystemManager.Instance.GetCurrentSceneMain<InGameSceneMain>().EnemyCacheSystem.Archive(FilePath);
 
-        go.transform.position = new Vector3(data.GeneratePointX, data.GeneratePointY);
+        //go.transform.position = new Vector3(data.GeneratePointX, data.GeneratePointY);
 
         Enemy enemy = go.GetComponent<Enemy>();
-        enemy.FilePath = FilePath;
-
+        enemy.SetPosition(new Vector3(data.GeneratePointX, data.GeneratePointY, 0f));
         enemy.Reset(data);
 
         enemies.Add(enemy);
@@ -36,6 +40,11 @@ public class EnemyManager : MonoBehaviour
 
     public bool RemoveEnemy(Enemy enemy)
     {
+        if (!((FWNetworkManager)FWNetworkManager.singleton).isServer)
+        {
+            return true;
+        }
+
         if (!enemies.Contains(enemy))
         {
             Debug.LogError("No exist Enemy");
@@ -48,8 +57,13 @@ public class EnemyManager : MonoBehaviour
         return true;
     }
 
-    private void Prepare()
+    public void Prepare()
     {
+        if (!((FWNetworkManager)FWNetworkManager.singleton).isServer)
+        {
+            return;
+        }
+
         for (int i = 0; i < enemyFiles.Length; ++i)
         {
             GameObject go = enemyFactory.Load(enemyFiles[i].filePath);
