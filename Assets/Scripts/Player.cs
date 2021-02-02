@@ -26,6 +26,9 @@ public class Player : Actor
 
     private readonly InputController inputController = new InputController();
 
+    [SyncVar]
+    private bool Host = false; // Host 플레이어인지 여부.
+
     private void OnTriggerEnter(Collider other)
     {
         Enemy enemy = other.GetComponentInParent<Enemy>();
@@ -55,8 +58,14 @@ public class Player : Actor
             inGameSceneMain.Hero = this;
         }
 
+        if (isServer && isLocalPlayer)
+        {
+            Host = true;
+            UpdateNetworkActor();
+        }
+
         Transform startTransform;
-        if (isServer)
+        if (Host)
         {
             startTransform = inGameSceneMain.PlayerStartTransform1;
         }

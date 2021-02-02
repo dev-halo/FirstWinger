@@ -41,6 +41,8 @@ public class InGameNetworkTransfer : NetworkBehaviour
         countingStartTime = Time.time;
         currentGameState = GameState.Ready;
 
-        SystemManager.Instance.GetCurrentSceneMain<InGameSceneMain>().EnemyManager.Prepare();
+        InGameSceneMain inGameSceneMain = SystemManager.Instance.GetCurrentSceneMain<InGameSceneMain>();
+        inGameSceneMain.EnemyManager.Prepare();
+        inGameSceneMain.BulletManager.Prepare();
     }
 }

@@ -14,7 +14,7 @@ public class BulletManager : MonoBehaviour
 
     private void Start()
     {
-        Prepare();
+        //Prepare();
     }
 
     private GameObject Load(string resourcePath)
@@ -40,8 +40,13 @@ public class BulletManager : MonoBehaviour
         return go;
     }
 
-    private void Prepare()
+    public void Prepare()
     {
+        if (!((FWNetworkManager)FWNetworkManager.singleton).isServer)
+        {
+            return;
+        }
+
         for (int i = 0; i <bulletFiles.Length; i++)
         {
             GameObject go = Load(bulletFiles[i].filePath);
@@ -51,17 +56,26 @@ public class BulletManager : MonoBehaviour
 
     public Bullet Generate(int index)
     {
+        if (!((FWNetworkManager)FWNetworkManager.singleton).isServer)
+        {
+            return null;
+        }
+
         string filePath = bulletFiles[index].filePath;
         GameObject go = SystemManager.Instance.GetCurrentSceneMain<InGameSceneMain>().BulletCacheSystem.Archive(filePath);
 
         Bullet bullet = go.GetComponent<Bullet>();
-        bullet.FilePath = filePath;
 
         return bullet;
     }
 
     public bool Remove(Bullet bullet)
     {
+        if (!((FWNetworkManager)FWNetworkManager.singleton).isServer)
+        {
+            return true;
+        }
+
         SystemManager.Instance.GetCurrentSceneMain<InGameSceneMain>().BulletCacheSystem.Restore(bullet.FilePath, bullet.gameObject);
         return true;
     }

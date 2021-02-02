@@ -1,28 +1,52 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Networking;
 
-public class Bullet : MonoBehaviour
+public class Bullet : NetworkBehaviour
 {
     private const float LifeTime = 15f;
 
+    [SyncVar]
     [SerializeField]
     private Vector3 MoveDirection = Vector3.zero;
 
+    [SyncVar]
     [SerializeField]
     float Speed = 0f;
 
+    [SyncVar]
     private bool needMove = false;
 
+    [SyncVar]
     private float firedTime = 0f;
+
+    [SyncVar]
     private bool hited = false;
 
+    [SyncVar]
     [SerializeField]
     private int Damage = 1;
 
-    private Actor Owner;
+    [SerializeField]
+    private Actor Owner; // NetworkBehaviour 상속 클래스라 SyncVar 가 안된다.
 
-    public string FilePath { get; set; }
+    [SyncVar]
+    [SerializeField]
+    private string filePath;
+
+    public string FilePath { get => filePath; set => filePath = value; }
+
+    private void Start()
+    {
+        if (!((FWNetworkManager)FWNetworkManager.singleton).isServer)
+        {
+            InGameSceneMain inGameSceneMain = SystemManager.Instance.GetCurrentSceneMain<InGameSceneMain>();
+            transform.SetParent(inGameSceneMain.BulletManager.transform);
+            inGameSceneMain.BulletCacheSystem.Add(FilePath, gameObject);
+            gameObject.SetActive(false);
+        }
+    }
 
     private void Update()
     {
@@ -42,13 +66,15 @@ public class Bullet : MonoBehaviour
     public void Fire(Actor owner, Vector3 firePosition, Vector3 direction, float speed, int damage)
     {
         Owner = owner;
-        transform.position = firePosition;
+        SetPosition(firePosition);
         MoveDirection = direction;
         Speed = speed;
         Damage = damage;
 
         needMove = true;
         firedTime = Time.time;
+
+        UpdateNetworkBullet();
     }
 
     private void UpdateMove()
@@ -132,5 +158,74 @@ public class Bullet : MonoBehaviour
     private void Disappear()
     {
         SystemManager.Instance.GetCurrentSceneMain<InGameSceneMain>().BulletManager.Remove(this);
+    }
+
+    [ClientRpc]
+    public void RpcSetActive(bool value)
+    {
+        gameObject.SetActive(value);
+        SetDirtyBit(1);
+    }
+
+    public void SetPosition(Vector3 position)
+    {
+        // 정상적으로 NetworkBehaviour 인스턴스의 Update 로 호출되어 실행되고 있을 때.
+        //CmdSetPosition(position);
+
+        // MonoBehaviour 인스턴스의 Update 로 호출되어 실행되고 있을때의 꼼수.
+        if (isServer)
+        {
+            RpcSetPosition(position); // Host 플레이어인 경우 RPC로 보내고
+        }
+        else
+        {
+            CmdSetPosition(position); // Client 플레이어인 경우 CMD 로 호스트로 보낸 후 자신을 Self 동작.
+            if (isLocalPlayer)
+            {
+                transform.position = position;
+            }
+        }
+    }
+
+    [Command]
+    public void CmdSetPosition(Vector3 position)
+    {
+        transform.position = position;
+        SetDirtyBit(1);
+    }
+
+    [ClientRpc]
+    public void RpcSetPosition(Vector3 position)
+    {
+        transform.position = position;
+        SetDirtyBit(1);
+    }
+
+    public void UpdateNetworkBullet()
+    {
+        // 정상적으로 NetworkBehaviour 인스턴스의 Update 로 호출되어 실행되고 있을 때.
+        //CmdUpdateNetworkBullet();
+
+        // MonoBehaviour 인스턴스의 Update 로 호출되어 실행되고 있을때의 꼼수.
+        if (isServer)
+        {
+            RpcUpdateNetworkBullet(); // Host 플레이어인 경우 RPC 로 보내고
+        }
+        else
+        {
+            CmdUpdateNetworkBullet(); // Client 플레이어인 경우 CMD 로 호스트로 보낸 후 Self 동작.
+        }
+    }
+
+    [Command]
+    public void CmdUpdateNetworkBullet()
+    {
+        SetDirtyBit(1);
+    }
+
+    [ClientRpc]
+    public void RpcUpdateNetworkBullet()
+    {
+        SetDirtyBit(1);
     }
 }
