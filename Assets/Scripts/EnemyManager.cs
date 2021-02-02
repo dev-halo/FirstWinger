@@ -53,7 +53,7 @@ public class EnemyManager : MonoBehaviour
         for (int i = 0; i < enemyFiles.Length; ++i)
         {
             GameObject go = enemyFactory.Load(enemyFiles[i].filePath);
-            SystemManager.Instance.GetCurrentSceneMain<InGameSceneMain>().EnemyCacheSystem.GenerateCache(enemyFiles[i].filePath, go, enemyFiles[i].cacheCount);
+            SystemManager.Instance.GetCurrentSceneMain<InGameSceneMain>().EnemyCacheSystem.GenerateCache(enemyFiles[i].filePath, go, enemyFiles[i].cacheCount, transform);
         }
     }
 }

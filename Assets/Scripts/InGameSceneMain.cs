@@ -1,20 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Networking;
 
 public class InGameSceneMain : BaseSceneMain
 {
-    const float GameReadyInterval = 3f;
-
-    public enum GameState : int
-    {
-        Ready,
-        Running,
-        End
-    }
-
-    private GameState currentGameState = GameState.Ready;
-    public GameState CurrentGameState => currentGameState;
+    public GameState CurrentGameState => InGameNetworkTransfer.CurrentGameState;
 
     [SerializeField]
     Player player;
@@ -73,30 +64,24 @@ public class InGameSceneMain : BaseSceneMain
     private SquadronManager squadronManager;
     public SquadronManager SquadronManager => squadronManager;
 
-    private float sceneStartTime;
-
     [SerializeField]
     private Transform mainBGQuadTransform;
     public Transform MainBGQuadTransform => mainBGQuadTransform;
 
-    protected override void OnStart()
+    [SerializeField]
+    private InGameNetworkTransfer inGameNetworkTransfer;
+    public InGameNetworkTransfer InGameNetworkTransfer => inGameNetworkTransfer;
+
+    [SerializeField]
+    private Transform playerStartTransform1;
+    public Transform PlayerStartTransform1 => playerStartTransform1;
+
+    [SerializeField]
+    private Transform playerStartTransform2;
+    public Transform PlayerStartTransform2 => playerStartTransform2;
+
+    public void GameStart()
     {
-        sceneStartTime = Time.time;
-    }
-
-    protected override void UpdateScene()
-    {
-        base.UpdateScene();
-
-        float currentTime = Time.time;
-
-        if (currentGameState == GameState.Ready)
-        {
-            if (currentTime - sceneStartTime > GameReadyInterval)
-            {
-                //SquadronManager.StartGame();
-                currentGameState = GameState.Running;
-            }
-        }
+        inGameNetworkTransfer.RpcGameStart();
     }
 }

@@ -24,7 +24,7 @@ public class Player : Actor
     [SerializeField]
     private float BulletSpeed = 1f;
 
-    private InputController inputController = new InputController();
+    private readonly InputController inputController = new InputController();
 
     private void OnTriggerEnter(Collider other)
     {
@@ -48,10 +48,24 @@ public class Player : Actor
         PlayerStatePanel playerStatePanel = PanelManager.GetPanel(typeof(PlayerStatePanel)) as PlayerStatePanel;
         playerStatePanel.SetHP(CurrentHP, MaxHP);
 
+        InGameSceneMain inGameSceneMain = SystemManager.Instance.GetCurrentSceneMain<InGameSceneMain>();
+
         if (isLocalPlayer)
         {
-            SystemManager.Instance.GetCurrentSceneMain<InGameSceneMain>().Hero = this;
+            inGameSceneMain.Hero = this;
         }
+
+        Transform startTransform;
+        if (isServer)
+        {
+            startTransform = inGameSceneMain.PlayerStartTransform1;
+        }
+        else
+        {
+            startTransform = inGameSceneMain.PlayerStartTransform2;
+        }
+
+        SetPosition(startTransform.position);
     }
 
     protected override void UpdateActor()
@@ -162,5 +176,39 @@ public class Player : Actor
         }
 
         return moveVector;
+    }
+
+    private void SetPosition(Vector3 position)
+    {
+        // 정상적으로 NetworkBehaviour 인스턴스의 Update 로 호출되어 실행되고 있을 때.
+        //CmdSetPosition(position);
+
+        // MonoBehaviour 인스턴스의 Update 로 호출되어 실행되고 있을때의 꼼수.
+        if (isServer)
+        {
+            RpcSetPosition(position); // Host 플레이어인 경우 RPC로 보내고
+        }
+        else
+        {
+            CmdSetPosition(position); // Client 플레이어인 경우 CMD 로 호스트로 보낸 후 자신을 Self 동작.
+            if (isLocalPlayer)
+            {
+                transform.position = position;
+            }
+        }
+    }
+
+    [Command]
+    public void CmdSetPosition(Vector3 position)
+    {
+        transform.position = position;
+        SetDirtyBit(1);
+    }
+
+    [ClientRpc]
+    public void RpcSetPosition(Vector3 position)
+    {
+        transform.position = position;
+        SetDirtyBit(1);
     }
 }
