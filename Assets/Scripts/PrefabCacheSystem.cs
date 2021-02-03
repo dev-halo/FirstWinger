@@ -68,16 +68,19 @@ public class PrefabCacheSystem
         GameObject go = Caches[filePath].Dequeue();
         go.SetActive(true);
 
-        Enemy enemy = go.GetComponent<Enemy>();
-        if (enemy)
+        if (((FWNetworkManager)FWNetworkManager.singleton).isServer)
         {
-            enemy.RpcSetActive(true);
-        }
+            Enemy enemy = go.GetComponent<Enemy>();
+            if (enemy)
+            {
+                enemy.RpcSetActive(true);
+            }
 
-        Bullet bullet = go.GetComponent<Bullet>();
-        if (bullet)
-        {
-            bullet.RpcSetActive(true);
+            Bullet bullet = go.GetComponent<Bullet>();
+            if (bullet)
+            {
+                bullet.RpcSetActive(true);
+            }
         }
 
         return go;
@@ -93,16 +96,19 @@ public class PrefabCacheSystem
 
         gameObject.SetActive(false);
 
-        Enemy enemy = gameObject.GetComponent<Enemy>();
-        if (enemy)
+        if (((FWNetworkManager)FWNetworkManager.singleton).isServer)
         {
-            enemy.RpcSetActive(false);
-        }
+            Enemy enemy = gameObject.GetComponent<Enemy>();
+            if (enemy)
+            {
+                enemy.RpcSetActive(false);
+            }
 
-        Bullet bullet = gameObject.GetComponent<Bullet>();
-        if (bullet)
-        {
-            bullet.RpcSetActive(false);
+            Bullet bullet = gameObject.GetComponent<Bullet>();
+            if (bullet)
+            {
+                bullet.RpcSetActive(false);
+            }
         }
 
         Caches[filePath].Enqueue(gameObject);

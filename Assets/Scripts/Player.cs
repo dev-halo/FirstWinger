@@ -5,6 +5,8 @@ using UnityEngine.Networking;
 
 public class Player : Actor
 {
+    private const string PlayerHUDPath = "Prefabs/PlayerHUD";
+
     [SerializeField]
     [SyncVar]
     private Vector3 MoveVector = Vector3.zero;
@@ -29,6 +31,9 @@ public class Player : Actor
     [SerializeField]
     [SyncVar]
     private bool Host = false; // Host 플레이어인지 여부.
+
+    [SerializeField]
+    private Material ClientPlayerMaterial;
 
     private void OnTriggerEnter(Collider other)
     {
@@ -71,6 +76,9 @@ public class Player : Actor
         else
         {
             startTransform = inGameSceneMain.PlayerStartTransform2;
+
+            MeshRenderer meshRenderer = GetComponentInChildren<MeshRenderer>();
+            meshRenderer.material = ClientPlayerMaterial;
         }
 
         SetPosition(startTransform.position);
@@ -79,6 +87,18 @@ public class Player : Actor
         {
             inGameSceneMain.ActorManager.Regist(actorInstanceID, this);
         }
+
+        InitializePlayerHUD();
+    }
+
+    private void InitializePlayerHUD()
+    {
+        InGameSceneMain inGameSceneMain = SystemManager.Instance.GetCurrentSceneMain<InGameSceneMain>();
+
+        GameObject go = Resources.Load<GameObject>(PlayerHUDPath);
+        GameObject goInstance = Instantiate(go, inGameSceneMain.DamageManager.CanvasTransform);
+        PlayerHUD playerHUD = goInstance.GetComponent<PlayerHUD>();
+        playerHUD.Initialize(this);
     }
 
     protected override void UpdateActor()

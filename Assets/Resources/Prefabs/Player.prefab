@@ -215,6 +215,8 @@ MonoBehaviour:
   boxCollider: {fileID: 9184088283478427976}
   FireTransform: {fileID: 266298223045261856}
   BulletSpeed: 10
+  Host: 0
+  ClientPlayerMaterial: {fileID: 2100000, guid: 8b52c4a2cbd2a8248b7c6e782e73497e, type: 2}
 --- !u!54 &7302114338031104739
 Rigidbody:
   m_ObjectHideFlags: 0

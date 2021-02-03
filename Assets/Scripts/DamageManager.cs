@@ -9,6 +9,7 @@ public class DamageManager : MonoBehaviour
 
     [SerializeField]
     private Transform canvasTransform;
+    public Transform CanvasTransform => canvasTransform;
 
     [SerializeField]
     private Canvas canvas;
