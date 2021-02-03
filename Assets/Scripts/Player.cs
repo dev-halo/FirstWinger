@@ -26,6 +26,7 @@ public class Player : Actor
 
     private readonly InputController inputController = new InputController();
 
+    [SerializeField]
     [SyncVar]
     private bool Host = false; // Host 플레이어인지 여부.
 
@@ -40,7 +41,7 @@ public class Player : Actor
                 Vector3 crashPos = enemy.transform.position + box.center;
                 crashPos.x -= box.size.x * 0.5f;
 
-                enemy.OnCrash(this, CrashDamage, crashPos);
+                enemy.OnCrash(CrashDamage, crashPos);
             }
         }
     }
@@ -48,8 +49,6 @@ public class Player : Actor
     protected override void Initialize()
     {
         base.Initialize();
-        PlayerStatePanel playerStatePanel = PanelManager.GetPanel(typeof(PlayerStatePanel)) as PlayerStatePanel;
-        playerStatePanel.SetHP(CurrentHP, MaxHP);
 
         InGameSceneMain inGameSceneMain = SystemManager.Instance.GetCurrentSceneMain<InGameSceneMain>();
 
@@ -61,7 +60,7 @@ public class Player : Actor
         if (isServer && isLocalPlayer)
         {
             Host = true;
-            UpdateNetworkActor();
+            RpcSetHost();
         }
 
         Transform startTransform;
@@ -75,6 +74,11 @@ public class Player : Actor
         }
 
         SetPosition(startTransform.position);
+
+        if (actorInstanceID != 0)
+        {
+            inGameSceneMain.ActorManager.Regist(actorInstanceID, this);
+        }
     }
 
     protected override void UpdateActor()
@@ -83,19 +87,18 @@ public class Player : Actor
         UpdateMove();
     }
 
-    protected override void DecreaseHP(Actor attacker, int value, Vector3 damagePos)
+    protected override void DecreaseHP(int value, Vector3 damagePos)
     {
-        base.DecreaseHP(attacker, value, damagePos);
-        PlayerStatePanel playerStatePanel = PanelManager.GetPanel(typeof(PlayerStatePanel)) as PlayerStatePanel;
-        playerStatePanel.SetHP(CurrentHP, MaxHP);
+        base.DecreaseHP(value, damagePos);
 
         Vector3 damagePoint = damagePos + Random.insideUnitSphere * 0.5f;
         SystemManager.Instance.GetCurrentSceneMain<InGameSceneMain>().DamageManager.Generate(DamageManager.PlayerDamageIndex, damagePoint, value, Color.red);
     }
 
-    protected override void OnDead(Actor attacker)
+    protected override void OnDead()
     {
-        base.OnDead(attacker);
+        base.OnDead();
+
         gameObject.SetActive(false);
     }
 
@@ -112,8 +115,23 @@ public class Player : Actor
 
     public void Fire()
     {
+        if (Host)
+        {
+            Bullet bullet = SystemManager.Instance.GetCurrentSceneMain<InGameSceneMain>().BulletManager.Generate(BulletManager.PlayerBulletIndex);
+            bullet.Fire(actorInstanceID, FireTransform.position, FireTransform.right, BulletSpeed, Damage);
+        }
+        else
+        {
+            CmdFire(actorInstanceID, FireTransform.position, FireTransform.right, BulletSpeed, Damage);
+        }
+    }
+
+    [Command]
+    public void CmdFire(int ownerInstanceID, Vector3 firePosition, Vector3 direction, float speed, int damage)
+    {
         Bullet bullet = SystemManager.Instance.GetCurrentSceneMain<InGameSceneMain>().BulletManager.Generate(BulletManager.PlayerBulletIndex);
-        bullet.Fire(this, FireTransform.position, FireTransform.right, BulletSpeed, Damage);
+        bullet.Fire(actorInstanceID, firePosition, direction, speed, damage);
+        SetDirtyBit(1);
     }
 
     private void UpdateMove()
@@ -185,5 +203,12 @@ public class Player : Actor
         }
 
         return moveVector;
+    }
+
+    [ClientRpc]
+    public void RpcSetHost()
+    {
+        Host = true;
+        SetDirtyBit(1);
     }
 }

@@ -9,9 +9,13 @@ public class Actor : NetworkBehaviour
     [SyncVar]
     protected int MaxHP = 100;
 
+    public int HPMax => MaxHP;
+
     [SerializeField]
     [SyncVar]
     protected int CurrentHP;
+
+    public int HPCurrent => CurrentHP;
 
     [SerializeField]
     [SyncVar]
@@ -23,9 +27,13 @@ public class Actor : NetworkBehaviour
 
     [SerializeField]
     [SyncVar]
-    private bool isDead = false;
+    protected bool isDead = false;
 
     public bool IsDead => isDead;
+
+    [SyncVar]
+    protected int actorInstanceID = 0;
+    public int ActorInstanceID => actorInstanceID;
 
     protected int CrashDamage => crashDamage;
 
@@ -39,21 +47,26 @@ public class Actor : NetworkBehaviour
         UpdateActor();
     }
 
-    public virtual void OnBulletHited(Actor attacker, int damage, Vector3 hitPos)
+    public virtual void OnBulletHited(int damage, Vector3 hitPos)
     {
         Debug.Log("OnBullet damage = " + damage);
-        DecreaseHP(attacker, damage, hitPos);
+        DecreaseHP(damage, hitPos);
     }
 
-    public virtual void OnCrash(Actor attacker, int damage, Vector3 crashPos)
+    public virtual void OnCrash(int damage, Vector3 crashPos)
     {
-        Debug.Log("OnCrash damage = " + damage);
-        DecreaseHP(attacker, damage, crashPos);
+        DecreaseHP(damage, crashPos);
     }
 
     protected virtual void Initialize()
     {
         CurrentHP = MaxHP;
+
+        if (isServer)
+        {
+            actorInstanceID = GetInstanceID();
+            RpcSetActorInstanceID(actorInstanceID);
+        }
     }
 
     protected virtual void UpdateActor()
@@ -61,13 +74,33 @@ public class Actor : NetworkBehaviour
 
     }
 
-    protected virtual void DecreaseHP(Actor attacker, int value, Vector3 damagePos)
+    protected virtual void DecreaseHP(int value, Vector3 damagePos)
     {
         if (isDead)
         {
             return;
         }
 
+        // 정상적으로 NetworkBehaviour 인스턴스의 Update 로 호출되어 실행되고 있을 때.
+        //CmdDecreaseHP(value, damagePos);
+
+        // MonoBehaviour 인스턴스의 Update 로 호출되어 실행되고 있을때의 꼼수.
+        if (isServer)
+        {
+            RpcDecreaseHP(value, damagePos); // Host 플레이어인 경우 RPC로 보내고
+        }
+        else
+        {
+            CmdDecreaseHP(value, damagePos); // Client 플레이어인 경우 CMD 로 호스트로 보낸 후 자신을 Self 동작.
+            if (isLocalPlayer)
+            {
+                InternalDecreaseHP(value, damagePos);
+            }
+        }
+    }
+
+    protected virtual void InternalDecreaseHP(int value, Vector3 damagePos)
+    {
         CurrentHP -= value;
 
         if (CurrentHP < 0)
@@ -77,11 +110,11 @@ public class Actor : NetworkBehaviour
 
         if (CurrentHP == 0)
         {
-            OnDead(attacker);
+            OnDead();
         }
     }
 
-    protected virtual void OnDead(Actor attacker)
+    protected virtual void OnDead()
     {
         Debug.Log(name + " OnDead()");
         isDead = true;
@@ -130,31 +163,30 @@ public class Actor : NetworkBehaviour
         SetDirtyBit(1);
     }
 
-    public void UpdateNetworkActor()
+    [ClientRpc]
+    public void RpcSetActorInstanceID(int instanceID)
     {
-        // 정상적으로 NetworkBehaviour 인스턴스의 Update 로 호출되어 실행되고 있을 때.
-        //CmdUpdateNetworkActor();
+        actorInstanceID = instanceID;
 
-        // MonoBehaviour 인스턴스의 Update 로 호출되어 실행되고 있을때의 꼼수.
-        if (isServer)
+        if (actorInstanceID != 0)
         {
-            RpcUpdateNetworkActor(); // Host 플레이어인 경우 RPC 로 보내고
-        }
-        else
-        {
-            CmdUpdateNetworkActor(); // Client 플레이어인 경우 CMD 로 호스트로 보낸 후 Self 동작.
+            SystemManager.Instance.GetCurrentSceneMain<InGameSceneMain>().ActorManager.Regist(actorInstanceID, this);
+
+            SetDirtyBit(1);
         }
     }
 
     [Command]
-    public void CmdUpdateNetworkActor()
+    public void CmdDecreaseHP(int value, Vector3 damagePos)
     {
+        InternalDecreaseHP(value, damagePos);
         SetDirtyBit(1);
     }
 
     [ClientRpc]
-    public void RpcUpdateNetworkActor()
+    public void RpcDecreaseHP(int value, Vector3 damagePos)
     {
+        InternalDecreaseHP(value, damagePos);
         SetDirtyBit(1);
     }
 }

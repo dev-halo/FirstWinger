@@ -16,7 +16,7 @@ public class InGameSceneMain : BaseSceneMain
         {
             if (!player)
             {
-                Debug.LogError("Main Player is not setted!");
+                Debug.LogWarning("Main Player is not setted!");
             }
 
             return player;
@@ -79,6 +79,9 @@ public class InGameSceneMain : BaseSceneMain
     [SerializeField]
     private Transform playerStartTransform2;
     public Transform PlayerStartTransform2 => playerStartTransform2;
+
+    private ActorManager actorManager = new ActorManager();
+    public ActorManager ActorManager => actorManager;
 
     public void GameStart()
     {

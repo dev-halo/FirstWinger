@@ -9,6 +9,11 @@ public class BasePanel : MonoBehaviour
         InitializePanel();
     }
 
+    private void Update()
+    {
+        UpdatePanel();
+    }
+
     private void OnDestroy()
     {
         DestroyPanel();
@@ -17,6 +22,11 @@ public class BasePanel : MonoBehaviour
     public virtual void InitializePanel()
     {
         PanelManager.RegistPanel(GetType(), this);
+    }
+
+    public virtual void UpdatePanel()
+    {
+
     }
 
     public virtual void DestroyPanel()
